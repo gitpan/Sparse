@@ -20,7 +20,7 @@ use overload
 
 @EXPORT = ();
 
-$VERSION = '0.02';
+$VERSION = '0.01';
 
 # sparse vector contructor 
 # creates an empty sparse vector
@@ -41,11 +41,6 @@ sub set
 	if(!defined $key || !defined $value)
 	{
 		print STDERR "Usage: vector->set(key,value)\n";
-		exit;
-	}
-	if($value==0)
-	{
-		print STDERR "Can not store 0 in the Sparse::Vector.\n";
 		exit;
 	}
 	$self->{$key} = $value;
@@ -81,7 +76,8 @@ sub keys
 sub print
 {
 	my $self = shift;
-	foreach my $ind ($self->keys)
+	my @keys = $self->keys();
+	foreach my $ind (@keys)
 	{
 		print "$ind " . $self->get($ind) . " ";
 	}
@@ -93,7 +89,8 @@ sub stringify
 {
 	my $self = shift;
 	my $str="";
-        foreach my $ind ($self->keys)
+        my @keys = $self->keys();
+        foreach my $ind (@keys)
         {
                 $str.= "$ind " . $self->get($ind) . " ";
         }
@@ -155,7 +152,10 @@ sub normalize
 {
 	my $self = shift;
 	my $vnorm = $self->norm;
-	$self->div($vnorm);
+	foreach my $key ($self->keys)
+	{
+		$self->{$key} /= $vnorm;
+	}
 }
 
 sub dot
@@ -176,45 +176,6 @@ sub dot
 		}
 	}
 	return $dotprod;
-}
-
-# divides each vector entry by a given divisor
-sub div
-{
-	my $self = shift;
-	my $divisor = shift;
-	if(!defined $divisor)
-	{
-		print STDERR "Usage: v1->div(DIVISOR)\n";
-		exit;
-	}
-	if($divisor==0)
-	{
-		print STDERR "Divisor 0 not allowed in Sparse::Vector::div().\n";
-		exit;
-	}
-	foreach my $key ($self->keys)
-	{
-		$self->{$key}/=$divisor;
-	}
-}
-
-# adds a given sparse vector to a binary sparse vector
-sub binadd
-{
-	my $v1 = shift;
-	my $v2 = shift;
-
-	if(!defined $v2)
-	{
-		print STDERR "Usage: v1->binadd(v2)\n";
-		exit;
-	}
-
-	foreach my $key ($v2->keys)
-	{
-		$v1->{$key}=1;
-	}
 }
 
 # deallocates all the vector entries
@@ -260,16 +221,8 @@ Sparse::Vector - Implements Sparse Vector Operations
   # result into v1
   $v1->add($v2);
 
-  # adds binary equivalent of v2 to v1
-  $v1->binadd($v2);
-  # binary equivalnet treats all non-zero values 
-  # as 1s
-
   # increments the value at index 12
   $spvec->incr(12);
-
-  # divides each vector entry by a given divisor 4
-  $spvec->div(4);
 
   # returns norm of the vector
   $spvec_norm = $spvec->norm;
