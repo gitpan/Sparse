@@ -5,7 +5,7 @@
 
 ######################### Load Sparse::Vector
 
-use Test::More tests => 15;
+use Test::More tests => 20;
 
 BEGIN { use_ok('Sparse::Vector'); }
 require_ok('Sparse::Vector');
@@ -15,11 +15,19 @@ require_ok('Sparse::Vector');
 $vector = Sparse::Vector->new;
 isa_ok($vector, 'Sparse::Vector');
 
+######################### isnull
+
+cmp_ok($vector->isnull, '==', 1, 'test isnull when null');
+
 ######################### get/set value 
 
 $vector->set(12,5);
 
 cmp_ok($vector->get(12), '==', 5, 'test get/set');
+
+######################### isnull
+
+cmp_ok($vector->isnull, '==', 0, 'test isnull when not null');
 
 ######################### get keys 
 
@@ -121,6 +129,10 @@ cmp_ok($v1->stringify, 'eq', "", 'test free');
 cmp_ok($v2->stringify, 'eq', "", 'test free');
 cmp_ok($v3->stringify, 'eq', "", 'test free');
 
+######################### isnull after free
+
+cmp_ok($v1->isnull, '==', 1, 'test isnull after free');
+
 ######################### dot
 
 $v1=Sparse::Vector->new;
@@ -145,4 +157,43 @@ $v2->set(8,2);
 # v1.v2 = 	4+8+3 = 15
 
 cmp_ok($v1->dot($v2), '==', 15, 'test dot');
+
+######################### div
+
+# v1   = 		2  0  0    1  4  2    1    3  0
+
+# v1/2 =		1  0  0  0.5  2  1  0.5  1.5  0
+
+$v1->div(2);
+cmp_ok($v1->stringify, 'eq', "0 1 3 0.5 4 2 5 1 6 0.5 7 1.5", 'test div');
+
+######################### binadd
+
+$v1->free;
+$v2->free;
+
+$v1=Sparse::Vector->new;
+$v1->set(5,1);
+$v1->set(10,1);
+$v1->set(15,1);
+$v1->set(22,1);
+$v1->set(27,1);
+$v1->set(34,1);
+
+$v2=Sparse::Vector->new;
+$v2->set(2,4);
+$v2->set(10,5);
+$v2->set(13,3);
+$v2->set(22,6);
+$v2->set(30,7);
+$v2->set(36,1);
+
+# v1 =		    5 1 10 1      15 1 22 1 27 1      34 1
+# v2 =		2 4     10 5 13 3      22 6      30 7      36 1
+
+$v1->binadd($v2);
+
+# v1 =		2 1 5 1 10 1 13 1 15 1 22 1 27 1 30 1 34 1 36 1
+
+cmp_ok($v1->stringify, 'eq', "2 1 5 1 10 1 13 1 15 1 22 1 27 1 30 1 34 1 36 1", 'test binadd');
 
