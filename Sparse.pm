@@ -15,7 +15,7 @@ use vars qw($VERSION @ISA @EXPORT @EXPORT_OK %EXPORT_TAGS);
 
 @EXPORT = ();
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 1;
 __END__
@@ -53,8 +53,16 @@ Sparse - Perl module for Sparse Vectors
   # result into v1
   $v1->add($v2);
 
+  # adds binary equivalent of v2 to v1
+  $v1->binadd($v2);
+  # binary equivalnet treats all non-zero values
+  # as 1s
+
   # increments the value at index 12
   $spvec->incr(12);
+
+  # divides each vector entry by a given divisor 4
+  $spvec->div(4);
 
   # returns norm of the vector
   $spvec_norm = $spvec->norm;
